@@ -4,7 +4,7 @@ namespace CleverTime;
 
 public partial class CreateTimerPage : ContentPage
 {
-    TTimer Timer;
+    TTimer timer;
     string TimerName;
 
     Label toTickHoursLabel, toTickMinutesLabel, toTickSecondsLabel;
@@ -18,14 +18,18 @@ public partial class CreateTimerPage : ContentPage
     DatePicker datePicker;
 
     bool isAlarm = false;
+    bool doNotDisturb = false;
+    bool isCheckedAntiLoop = false;
 
     public CreateTimerPage()
 	{
 		InitializeComponent();
         DrawTimerGrid();
+        timer = new TTimer();
     }
 
     private void NameInput_Completed(object sender, EventArgs e) => TimerName = NameInput.Text;
+    private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e) => doNotDisturb = !doNotDisturb;
 
     private void isAlarm_CheckedChanged(object sender, CheckedChangedEventArgs e)
 	{
@@ -43,26 +47,105 @@ public partial class CreateTimerPage : ContentPage
         }
     }
 
-    private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    private async void AddToGroupCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
-        // todo
+        // returns choosed action in string type
+        if (isCheckedAntiLoop) // to avoid event looping
+        {
+            isCheckedAntiLoop = false;
+            return;
+        }
+
+        if (timer.groupName != TTimer.DEFAULT_GROUP)
+        {
+            bool isAddingToNewGroup = await DisplayAlert("Alert", $"This timer is already set to the group {timer.groupName}!\n" +
+                        $"Do you want to change group?", "Yes", "No");
+            if (isAddingToNewGroup == false)
+            {
+                isCheckedAntiLoop = true;
+                AddToGroupCheckBox.IsChecked = true;
+                return;
+            }
+            else
+                AddToGroupCheckBox.IsChecked = true;
+
+        }
+        if (TTimer.isGroupsEmpty())
+        {
+            bool isCreatingroup = await DisplayAlert("Ooops", "You don't have any groups yet.\n" +
+                "Do you want to add a new one?", "Yes", "No");
+            if (isCreatingroup == false)
+            {
+                isCheckedAntiLoop = true;
+                AddToGroupCheckBox.IsChecked = false;
+                return;
+            }
+            else
+                AddNewGroup();
+        }
+        else if (AddToGroupCheckBox.IsChecked)
+        {
+            string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", TTimer.Groups.ToArray());
+            if (action == "Cancel")
+            {
+                AddToGroupCheckBox.IsChecked = true;
+                return;
+            }
+            else if (action == "Add new")
+                AddNewGroup();
+            else
+            {
+                AddToGroupCheckBox.IsChecked = true;
+                timer.groupName = action;
+            }
+        }
+    }
+
+    async void AddNewGroup()
+    {
+        string groupName = await DisplayPromptAsync("Add group", "Input desired group name.");
+        if (string.IsNullOrWhiteSpace(groupName) || TTimer.Groups.Contains(groupName))
+        {
+            await DisplayAlert("Ooops", "Incorrect name for the group ;c", "Try again");
+            isCheckedAntiLoop = true;
+            AddToGroupCheckBox.IsChecked = false;
+            return;
+        }
+        else
+        {
+            TTimer.Groups.Add(groupName);
+            bool isAddingToNewGroup = await DisplayAlert("Success", $"You created a group {groupName}!\n" +
+                $"Do you want to add this timer to {groupName}?", "Yes", "No");
+            if (isAddingToNewGroup)
+                timer.groupName = groupName;
+            else
+            {
+                isCheckedAntiLoop = true;
+                AddToGroupCheckBox.IsChecked = false;
+            }
+        }
     }
 
     private void SaveButton_Clicked(object sender, EventArgs e) => SaveTimer(false);
     private void SaveAndRunButton_Clicked(object sender, EventArgs e) => SaveTimer(true);
+    
 
     async void SaveTimer(bool run)
     {
         if (isAlarm == false)
         {
-            var now = DateTime.Now;
-
-            Timer.TotalTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
-
+            timer.TimerTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
+            timer.doNotDistub = doNotDisturb;
             if (run)
-                Timer.StartTickTime = now;
+            {
+                timer.isRunning = true;
+                timer.StartTickTime = DateTime.Now;
+            }
             else
-                Timer.StartTickTime = default;
+            {
+                timer.isRunning = false;
+                timer.StartTickTime = default;
+            }
         }
         else // if alarm
         {
@@ -73,8 +156,17 @@ public partial class CreateTimerPage : ContentPage
                 timePicker.Time = DateTime.Now.TimeOfDay.Add(new TimeSpan(0, 1, 0));
                 return;
             }
-        }
 
+            timer.doNotDistub = doNotDisturb;
+            if (run)
+            {
+                timer.isRunning = true;
+                timer.AlarmDateTime = datePicker.Date.Add(timePicker.Time);
+            }
+            else
+                timer.isRunning = false;
+        }
+        TTimer.AllTimers.TryAdd(timer.groupName, timer);
     }
 
     #region TimerGrid
@@ -175,17 +267,12 @@ public partial class CreateTimerPage : ContentPage
         };
         datePicker.HorizontalOptions = LayoutOptions.CenterAndExpand;
 
-        datePicker.DateSelected += DatePicker_DateSelected;
         AlarmLayout.Add(datePicker);
         AlarmLayout.Add(timePicker);
 
         InputsLayout.Add(AlarmLayout);
     }
 
-    private void DatePicker_DateSelected(object sender, DateChangedEventArgs e)
-    {
-        
-    }
-
     #endregion
+
 }

@@ -9,17 +9,24 @@ namespace CleverTime
 {
     class TTimer
     {
-        public static List<TTimer> AllTimers;
-        public DateTime StartTickTime { get; set; }
-        public TimeSpan TotalTimeToTick { get; set; }
+        public const string DEFAULT_GROUP = "default";
+        public static Dictionary<string, TTimer> AllTimers;
+        public static List<string> Groups;
+        public DateTime StartTickTime { get; set; } 
+        public DateTime AlarmDateTime { get; set; }
+        public TimeSpan TimerTimeToTick { get; set; } // hh,mm,ss
+        public bool isRunning { get; set; }
+        public bool isAlarm { get; set; }
+        public bool doNotDistub { get; set; }
+        public string groupName = DEFAULT_GROUP;
 
         static TTimer()
         {
             AllTimers = new();
+            Groups = new() { DEFAULT_GROUP };
         }
-        public TTimer()
-        {
-            AllTimers.Add(this);
-        }
+
+        public static bool isGroupsEmpty() => Groups.Count == 1 ? true : false;
+
     }
 }
