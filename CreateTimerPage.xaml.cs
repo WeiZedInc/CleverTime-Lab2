@@ -4,37 +4,44 @@ namespace CleverTime;
 
 public partial class CreateTimerPage : ContentPage
 {
-    TTimer timer;
+    TTimer Timer;
     string TimerName;
 
-    Label toTickHoursLabel, toTickMinutesLabel, toTickSecondsLabel, 
-        toTickFromHoursLabel, toTickFromMinutes, toTickFromSeconds;
-    Slider toTickHoursSlider, toTickMinutesSlider, toTickSecondsSlider,
-        toTickFromHoursSlider, toTickFromMinutesSlider, toTickFromSecondsSlider;
+    Label toTickHoursLabel, toTickMinutesLabel, toTickSecondsLabel;
+    Slider toTickHoursSlider, toTickMinutesSlider, toTickSecondsSlider;
 
-    Grid TimeToTick_Grid, TimeToTickFrom_Grid;
-    int hoursToTick, minutesToTick, secondsToTick, 
-        hoursToTickFrom, minutesToTickFrom, secondsToTickFrom = 0;
+    Grid TimerGrid;
+    VerticalStackLayout AlarmLayout;
+    int hoursToTick, minutesToTick, secondsToTick = 0;
+
+    TimePicker timePicker;
+    DatePicker datePicker;
+
+    bool isAlarm = false;
 
     public CreateTimerPage()
 	{
 		InitializeComponent();
-        DrawTimeToTick_Sliders();
+        DrawTimerGrid();
     }
 
     private void NameInput_Completed(object sender, EventArgs e) => TimerName = NameInput.Text;
 
-    private void isFromNowCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    private void isAlarm_CheckedChanged(object sender, CheckedChangedEventArgs e)
 	{
-		if (e.Value == false)
+		if (e.Value == true)
 		{
-            DrawTimeToStartFrom_Sliders(); // draw slider to choose time where to start from
+            InputsLayout.Remove(TimerGrid);
+            DrawAlarmLayout();
+            isAlarm = true;
         }
 		else
         {
-            InputsLayout.Remove(TimeToTickFrom_Grid);
+            InputsLayout.Remove(AlarmLayout);
+            DrawTimerGrid();
+            isAlarm = false;
         }
-	}
+    }
 
     private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
@@ -44,32 +51,36 @@ public partial class CreateTimerPage : ContentPage
     private void SaveButton_Clicked(object sender, EventArgs e) => SaveTimer(false);
     private void SaveAndRunButton_Clicked(object sender, EventArgs e) => SaveTimer(true);
 
-    void SaveTimer(bool run)
+    async void SaveTimer(bool run)
     {
-        var now = DateTime.Now;
-        if (isFromNowCheckBox.IsEnabled)
-            timer.StartTickTime = now;
-        else
-            timer.StartTickTime = new DateTime(now.Year, now.Month, now.Day, hoursToTickFrom, minutesToTickFrom, secondsToTickFrom);
-
-        //end time for calculations
-        timer.TotalTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
-        timer.EndTickTime = new DateTime(now.Year, now.Month, now.Day, hoursToTick, minutesToTick, secondsToTick);
-
-        if (run)
+        if (isAlarm == false)
         {
+            var now = DateTime.Now;
 
+            Timer.TotalTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
+
+            if (run)
+                Timer.StartTickTime = now;
+            else
+                Timer.StartTickTime = default;
         }
-        else
+        else // if alarm
         {
-
+            if (datePicker.Date == DateTime.Today && timePicker.Time <= DateTime.Now.TimeOfDay)
+            {
+                await DisplayAlert("Ooops", "You cant confirm time which had already past ;c" +
+                    "\nTime switched to most closerly possible.", "Try again");
+                timePicker.Time = DateTime.Now.TimeOfDay.Add(new TimeSpan(0, 1, 0));
+                return;
+            }
         }
+
     }
 
-    #region TimeToTick
-    void DrawTimeToTick_Sliders()
+    #region TimerGrid
+    void DrawTimerGrid()
     {
-        TimeToTick_Grid = new Grid
+        TimerGrid = new Grid
         {
             Margin = new Thickness(10),
             RowDefinitions =
@@ -89,40 +100,40 @@ public partial class CreateTimerPage : ContentPage
         toTickHoursSlider.Minimum = 0;
         toTickHoursSlider.Maximum = 24;
         Grid.SetRow(toTickHoursSlider, 1);
-        TimeToTick_Grid.Add(toTickHoursSlider);
+        TimerGrid.Add(toTickHoursSlider);
 
         toTickMinutesSlider = new Slider();
         toTickMinutesSlider.ValueChanged += OnMinutesSliderChanged;
         toTickMinutesSlider.Minimum = 0;
         toTickMinutesSlider.Maximum = 60;
         Grid.SetRow(toTickMinutesSlider, 3);
-        TimeToTick_Grid.Add(toTickMinutesSlider);
+        TimerGrid.Add(toTickMinutesSlider);
 
         toTickSecondsSlider = new Slider();
         toTickSecondsSlider.ValueChanged += OnSecondsSliderChanged;
         toTickSecondsSlider.Minimum = 0;
         toTickSecondsSlider.Maximum = 60;
         Grid.SetRow(toTickSecondsSlider, 5);
-        TimeToTick_Grid.Add(toTickSecondsSlider);
+        TimerGrid.Add(toTickSecondsSlider);
 
         var timeToTickLabel = new Label();
         timeToTickLabel.Text = "Choose time to tick";
         timeToTickLabel.HorizontalOptions = LayoutOptions.Center;
-        TimeToTick_Grid.Add(timeToTickLabel);
+        TimerGrid.Add(timeToTickLabel);
 
         toTickHoursLabel = new Label();
         Grid.SetRow(toTickHoursLabel, 2);
-        TimeToTick_Grid.Add(toTickHoursLabel);
+        TimerGrid.Add(toTickHoursLabel);
 
         toTickMinutesLabel = new Label();
         Grid.SetRow(toTickMinutesLabel, 4);
-        TimeToTick_Grid.Add(toTickMinutesLabel);
+        TimerGrid.Add(toTickMinutesLabel);
 
         toTickSecondsLabel = new Label();
         Grid.SetRow(toTickSecondsLabel, 6);
-        TimeToTick_Grid.Add(toTickSecondsLabel);
+        TimerGrid.Add(toTickSecondsLabel);
 
-        InputsLayout.Add(TimeToTick_Grid);
+        InputsLayout.Add(TimerGrid);
     }
     void OnHoursSliderChanged(object sender, ValueChangedEventArgs e)
     {
@@ -141,79 +152,40 @@ public partial class CreateTimerPage : ContentPage
     }
     #endregion
 
-    #region TimeToTickFrom
-    void DrawTimeToStartFrom_Sliders()
+    #region AlarmLayout
+    void DrawAlarmLayout()
     {
-        TimeToTickFrom_Grid = new Grid
-        {
+        AlarmLayout = new VerticalStackLayout {
             Margin = new Thickness(10),
-            RowDefinitions =
-            {
-                new RowDefinition(),
-                new RowDefinition(),
-                new RowDefinition(),
-                new RowDefinition(),
-                new RowDefinition(),
-                new RowDefinition(),
-                new RowDefinition()
-            }
+            Spacing = 10,
+            HorizontalOptions = LayoutOptions.CenterAndExpand
+            
         };
 
-        toTickFromHoursSlider = new Slider();
-        toTickFromHoursSlider.ValueChanged += OnStartHoursSliderChanged;
-        toTickFromHoursSlider.Minimum = 0;
-        toTickFromHoursSlider.Maximum = 24;
-        Grid.SetRow(toTickFromHoursSlider, 1);
-        TimeToTickFrom_Grid.Add(toTickFromHoursSlider);
+        timePicker = new TimePicker
+        {
+            Time = new TimeSpan(8, 0, 0),
+        };
 
-        toTickFromMinutesSlider = new Slider();
-        toTickFromMinutesSlider.ValueChanged += OnStartMinutesSliderChanged;
-        toTickFromMinutesSlider.Minimum = 0;
-        toTickFromMinutesSlider.Maximum = 60;
-        Grid.SetRow(toTickFromMinutesSlider, 3);
-        TimeToTickFrom_Grid.Add(toTickFromMinutesSlider);
+        datePicker = new DatePicker
+        {
+            MinimumDate = DateTime.Today,
+            MaximumDate = DateTime.MaxValue,
+            Date = DateTime.Today,
+        };
+        datePicker.HorizontalOptions = LayoutOptions.CenterAndExpand;
 
-        toTickFromSecondsSlider = new Slider();
-        toTickFromSecondsSlider.ValueChanged += OnStartSecondsSliderChanged;
-        toTickFromSecondsSlider.Minimum = 0;
-        toTickFromSecondsSlider.Maximum = 60;
-        Grid.SetRow(toTickFromSecondsSlider, 5);
-        TimeToTickFrom_Grid.Add(toTickFromSecondsSlider);
+        datePicker.DateSelected += DatePicker_DateSelected;
+        AlarmLayout.Add(datePicker);
+        AlarmLayout.Add(timePicker);
 
-        var timeToTickLabel = new Label();
-        timeToTickLabel.Text = "Choose time to tick from";
-        timeToTickLabel.HorizontalOptions = LayoutOptions.Center;
-        TimeToTickFrom_Grid.Add(timeToTickLabel);
-
-        toTickFromHoursLabel = new Label();
-        Grid.SetRow(toTickFromHoursLabel, 2);
-        TimeToTickFrom_Grid.Add(toTickFromHoursLabel);
-
-        toTickFromMinutes = new Label();
-        Grid.SetRow(toTickFromMinutes, 4);
-        TimeToTickFrom_Grid.Add(toTickFromMinutes);
-
-        toTickFromSeconds = new Label();
-        Grid.SetRow(toTickFromSeconds, 6);
-        TimeToTickFrom_Grid.Add(toTickFromSeconds);
-
-        InputsLayout.Add(TimeToTickFrom_Grid);
+        InputsLayout.Add(AlarmLayout);
     }
 
-    void OnStartHoursSliderChanged(object sender, ValueChangedEventArgs e)
+    private void DatePicker_DateSelected(object sender, DateChangedEventArgs e)
     {
-        hoursToTickFrom = ((int)toTickFromHoursSlider.Value);
-        toTickFromHoursLabel.Text = "Hours: " + hoursToTickFrom.ToString();
+        
     }
-    void OnStartMinutesSliderChanged(object sender, ValueChangedEventArgs e)
-    {
-        minutesToTickFrom = ((int)toTickFromMinutesSlider.Value);
-        toTickFromMinutes.Text = "Minutes: " + minutesToTickFrom.ToString();
-    }
-    void OnStartSecondsSliderChanged(object sender, ValueChangedEventArgs e)
-    {
-        secondsToTickFrom = ((int)toTickFromSecondsSlider.Value);
-        toTickFromSeconds.Text = "Seconds: " + secondsToTickFrom.ToString();
-    }
+
     #endregion
 }

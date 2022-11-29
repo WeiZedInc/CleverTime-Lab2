@@ -17,12 +17,12 @@
 
             <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
                  <Label VerticalOptions="Center"
-                 Text="Start from current time:"/>
+                 Text="Make an alarm"/>
 
                   <CheckBox 
-                  x:Name="isFromNowCheckBox"
-                  IsChecked="true" 
-                  CheckedChanged="isFromNowCheckBox_CheckedChanged"/>
+                  x:Name="MakeAlarmCheckBox"
+                  IsChecked="False" 
+                  CheckedChanged="isAlarm_CheckedChanged"/>
 
                   <Label VerticalOptions="Center"
                   Text="Do not disturb:"/>
