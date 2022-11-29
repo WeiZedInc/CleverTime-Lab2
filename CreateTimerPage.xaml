@@ -3,25 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CleverTime.CreateTimerPage"
              Title="Add new timer">
-    <Grid>
-        <ScrollView>
-            <FlexLayout x:Name="flexLayout"
-                        Wrap="Wrap"
-                        JustifyContent="SpaceAround">
 
-            <Entry
+
+    <StackLayout Orientation="Vertical" x:Name="RootLayout">
+
+        <Entry
              x:Name="NameInput"
              Placeholder="Input incredible name"
              Completed="NameInput_Completed" />
+        
+        <HorizontalStackLayout>
+        <Label VerticalOptions="Center"
+            Text="Start from current time:"/>
 
-            <Label 
-            Text="check:"/>
-
-            <CheckBox 
+        <CheckBox 
             x:Name="isFromNowCheckBox"
-            IsChecked="true" />
-            </FlexLayout>
+            IsChecked="true" 
+            CheckedChanged="isFromNowCheckBox_CheckedChanged"/>
 
-        </ScrollView>
-    </Grid>
+        </HorizontalStackLayout>
+        
+    </StackLayout>
 </ContentPage>
