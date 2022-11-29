@@ -7,10 +7,12 @@ public partial class CreateTimerPage : ContentPage
     Label hoursLabel, minutesLabel, secondsLabel;
     Slider hoursSlider, minutesSlider, secondsSlider;
     Grid childGrid;
-
+    Timer startFromTimer;
+    // Нужно сделать появление timepicker/datepicker если isFromNowCheckBox_CheckedChanged выключили
     public CreateTimerPage()
 	{
 		InitializeComponent();
+        CreateInputSliders();
     }
 
     private void NameInput_Completed(object sender, EventArgs e)
@@ -22,29 +24,24 @@ public partial class CreateTimerPage : ContentPage
 	{
 		if (e.Value == false)
 		{
-            CreateTimeSliders();
-            RootLayout.Add(childGrid);
+            //startFromTimer = new();
         }
 		else
-            RootLayout.Remove(childGrid);
+        {
+            startFromTimer = null;
+        }
 	}
-    void OnHoursSliderChanged(object sender, ValueChangedEventArgs e)
+
+    private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
-        hoursLabel.Text = "Hours: " + ((int)hoursSlider.Value).ToString();
+        // todo
     }
-    void OnMinutesSliderChanged(object sender, ValueChangedEventArgs e)
-    {
-        minutesLabel.Text = "Minutes: " + ((int)minutesSlider.Value).ToString();
-    }
-    void OnSecondsSliderChanged(object sender, ValueChangedEventArgs e)
-    {
-        secondsLabel.Text = "Seconds: " + ((int)secondsSlider.Value).ToString();
-    }
-    void CreateTimeSliders()
+
+    void CreateInputSliders()
     {
         childGrid = new Grid
         {
-            Margin = new Thickness(20),
+            Margin = new Thickness(10),
             RowDefinitions =
             {
                 new RowDefinition(),
@@ -88,5 +85,20 @@ public partial class CreateTimerPage : ContentPage
         secondsLabel = new Label();
         Grid.SetRow(secondsLabel, 5);
         childGrid.Add(secondsLabel);
+
+        InputsLayout.Add(childGrid);
+    }
+
+    void OnHoursSliderChanged(object sender, ValueChangedEventArgs e)
+    {
+        hoursLabel.Text = "Hours: " + ((int)hoursSlider.Value).ToString();
+    }
+    void OnMinutesSliderChanged(object sender, ValueChangedEventArgs e)
+    {
+        minutesLabel.Text = "Minutes: " + ((int)minutesSlider.Value).ToString();
+    }
+    void OnSecondsSliderChanged(object sender, ValueChangedEventArgs e)
+    {
+        secondsLabel.Text = "Seconds: " + ((int)secondsSlider.Value).ToString();
     }
 }

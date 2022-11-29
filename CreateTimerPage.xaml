@@ -6,22 +6,39 @@
 
 
     <StackLayout Orientation="Vertical" x:Name="RootLayout">
-
+        
+        
+        
+        <StackLayout Orientation="Vertical" x:Name="InputsLayout" Margin="10" Spacing="10">
+            
         <Entry
              x:Name="NameInput"
              Placeholder="Input incredible name"
              Completed="NameInput_Completed" />
         
         <HorizontalStackLayout>
-        <Label VerticalOptions="Center"
+            <Label VerticalOptions="Center"
             Text="Start from current time:"/>
 
-        <CheckBox 
+            <CheckBox 
             x:Name="isFromNowCheckBox"
             IsChecked="true" 
             CheckedChanged="isFromNowCheckBox_CheckedChanged"/>
 
-        </HorizontalStackLayout>
+                <Label VerticalOptions="Center"
+            Text="Do not disturb:"/>
+
+                <CheckBox 
+            x:Name="doNotDisturbCheckBox"
+            IsChecked="False" 
+            CheckedChanged="doNotDisturbCheckBox_CheckedChanged"/>
+
+            </HorizontalStackLayout>
+            
+            
+        </StackLayout>
+        
+        
         
     </StackLayout>
 </ContentPage>
