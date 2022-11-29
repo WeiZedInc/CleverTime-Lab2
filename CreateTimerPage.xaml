@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CleverTime.CreateTimerPage"
+             Title="Add new timer">
+    <Grid>
+        <ScrollView>
+            <FlexLayout x:Name="flexLayout"
+                        Wrap="Wrap"
+                        JustifyContent="SpaceAround">
+
+            <Entry
+             x:Name="NameInput"
+             Placeholder="Input incredible name"
+             Completed="NameInput_Completed" />
+
+            <Label 
+            Text="check:"/>
+
+            <CheckBox 
+            x:Name="isFromNowCheckBox"
+            IsChecked="true" />
+            </FlexLayout>
+
+        </ScrollView>
+    </Grid>
+</ContentPage>
