@@ -8,7 +8,8 @@ namespace CleverTime
 {
     class TTimer
     {
-        public DateTime dt { get; set; }
-        public TimeSpan ts { get; set; }
+        public DateTime StartTickTime { get; set; }
+        public DateTime EndTickTime { get; set; }
+        public TimeSpan TotalTimeToTick { get; set; }
     }
 }
