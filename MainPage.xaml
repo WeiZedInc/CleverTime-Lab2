@@ -7,14 +7,16 @@
         <VerticalStackLayout
             Spacing="25"
             Padding="30,0"
-            VerticalOptions="Start">
+            VerticalOptions="Start"
+            x:Name="RootLayout">
 
             <Button
-                x:Name="CreateTimer"
+                x:Name="CreateTimerButton"
                 Text="Add Timer"
-                Clicked="OnCreateTimer"
+                Clicked="OnCreateTimer_Clicked"
                 HorizontalOptions="Center" />
 
+            
         </VerticalStackLayout>
     </ScrollView>
 

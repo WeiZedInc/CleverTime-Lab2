@@ -4,7 +4,7 @@ using Font = Microsoft.Maui.Font;
 
 namespace CleverTime
 {
-    class TTimer
+    public class TTimer
     {
         public const string DEFAULT_GROUP = "default";
         public static Dictionary<string, TTimer> AllTimers;
@@ -16,6 +16,7 @@ namespace CleverTime
         public bool isAlarm { get; set; }
         public bool doNotDistub { get; set; }
         public string groupName = DEFAULT_GROUP;
+        public string Name, Description;
 
         static TTimer()
         {

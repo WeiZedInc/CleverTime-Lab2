@@ -3,7 +3,7 @@ namespace CleverTime;
 public partial class CreateTimerPage : ContentPage
 {
     TTimer timer;
-    string TimerName;
+    string TimerName, TimerDescription;
 
     Label toTickHoursLabel, toTickMinutesLabel, toTickSecondsLabel;
     Slider toTickHoursSlider, toTickMinutesSlider, toTickSecondsSlider;
@@ -26,6 +26,8 @@ public partial class CreateTimerPage : ContentPage
     }
 
     private void NameInput_Completed(object sender, EventArgs e) => TimerName = NameInput.Text;
+    private void DescriptionInput_Completed(object sender, EventArgs e) => TimerDescription = DescriptionInput.Text;
+
     private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e) => doNotDisturb = !doNotDisturb;
     private void isAlarm_CheckedChanged(object sender, CheckedChangedEventArgs e)
 	{
@@ -101,11 +103,8 @@ public partial class CreateTimerPage : ContentPage
 
     private void SaveButton_Clicked(object sender, EventArgs e) => SaveTimer(false);
     private void SaveAndRunButton_Clicked(object sender, EventArgs e) => SaveTimer(true);
-    
-
     async void SaveTimer(bool run)
     {
-        TTimer.ShowSnakeBar();
         if (isAlarm == false)
         {
             timer.TimerTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
@@ -142,6 +141,8 @@ public partial class CreateTimerPage : ContentPage
         }
         TTimer.AllTimers.TryAdd(timer.groupName, timer);
     }
+
+    #region Layouts
 
     #region TimerGrid
     void DrawTimerGrid()
@@ -221,11 +222,12 @@ public partial class CreateTimerPage : ContentPage
     #region AlarmLayout
     void DrawAlarmLayout()
     {
-        AlarmLayout = new VerticalStackLayout {
+        AlarmLayout = new VerticalStackLayout
+        {
             Margin = new Thickness(10),
             Spacing = 10,
             HorizontalOptions = LayoutOptions.CenterAndExpand
-            
+
         };
 
         timePicker = new TimePicker
@@ -249,4 +251,5 @@ public partial class CreateTimerPage : ContentPage
 
     #endregion
 
+    #endregion
 }

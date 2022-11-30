@@ -14,6 +14,10 @@
             <Entry x:Name="NameInput"
             Placeholder="Input incredible name"
             Completed="NameInput_Completed" />
+            
+            <Entry x:Name="DescriptionInput"
+            Placeholder="Input description"
+            Completed="DescriptionInput_Completed" />
 
             <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
                 <Label VerticalOptions="Center"
