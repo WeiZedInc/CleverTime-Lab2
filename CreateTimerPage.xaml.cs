@@ -1,5 +1,3 @@
-using Microsoft.Maui;
-
 namespace CleverTime;
 
 public partial class CreateTimerPage : ContentPage
@@ -107,6 +105,7 @@ public partial class CreateTimerPage : ContentPage
 
     async void SaveTimer(bool run)
     {
+        TTimer.ShowSnakeBar();
         if (isAlarm == false)
         {
             timer.TimerTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
