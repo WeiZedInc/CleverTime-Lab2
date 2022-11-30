@@ -19,7 +19,6 @@ public partial class CreateTimerPage : ContentPage
 
     bool isAlarm = false;
     bool doNotDisturb = false;
-    bool isCheckedAntiLoop = false;
 
     public CreateTimerPage()
 	{
@@ -30,7 +29,6 @@ public partial class CreateTimerPage : ContentPage
 
     private void NameInput_Completed(object sender, EventArgs e) => TimerName = NameInput.Text;
     private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e) => doNotDisturb = !doNotDisturb;
-
     private void isAlarm_CheckedChanged(object sender, CheckedChangedEventArgs e)
 	{
 		if (e.Value == true)
@@ -46,53 +44,32 @@ public partial class CreateTimerPage : ContentPage
             isAlarm = false;
         }
     }
-
     private async void AddToGroupCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
         // returns choosed action in string type
-        if (isCheckedAntiLoop) // to avoid event looping
+        if (AddToGroupCheckBox.IsChecked == false) // to avoid event looping
         {
-            isCheckedAntiLoop = false;
+            if (timer.groupName != TTimer.DEFAULT_GROUP)
+                timer.groupName = TTimer.DEFAULT_GROUP;
             return;
-        }
-
-        if (timer.groupName != TTimer.DEFAULT_GROUP)
-        {
-            bool isAddingToNewGroup = await DisplayAlert("Alert", $"This timer is already set to the group {timer.groupName}!\n" +
-                        $"Do you want to change group?", "Yes", "No");
-            if (isAddingToNewGroup == false)
-            {
-                isCheckedAntiLoop = true;
-                AddToGroupCheckBox.IsChecked = true;
-                return;
-            }
-            else
-                AddToGroupCheckBox.IsChecked = true;
-
-        }
-        if (TTimer.isGroupsEmpty())
-        {
-            bool isCreatingroup = await DisplayAlert("Ooops", "You don't have any groups yet.\n" +
-                "Do you want to add a new one?", "Yes", "No");
-            if (isCreatingroup == false)
-            {
-                isCheckedAntiLoop = true;
-                AddToGroupCheckBox.IsChecked = false;
-                return;
-            }
-            else
-                AddNewGroup();
         }
         else if (AddToGroupCheckBox.IsChecked)
         {
             string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", TTimer.Groups.ToArray());
             if (action == "Cancel")
             {
-                AddToGroupCheckBox.IsChecked = true;
+                AddToGroupCheckBox.IsChecked = false;
                 return;
             }
             else if (action == "Add new")
+            {
                 AddNewGroup();
+            }
+            else if (action == TTimer.DEFAULT_GROUP)
+            {
+                AddToGroupCheckBox.IsChecked = false;
+                timer.groupName = TTimer.DEFAULT_GROUP;
+            }
             else
             {
                 AddToGroupCheckBox.IsChecked = true;
@@ -100,14 +77,12 @@ public partial class CreateTimerPage : ContentPage
             }
         }
     }
-
-    async void AddNewGroup()
+    async void AddNewGroup() // написать логику таймеров и дальше вывести их на экр
     {
         string groupName = await DisplayPromptAsync("Add group", "Input desired group name.");
         if (string.IsNullOrWhiteSpace(groupName) || TTimer.Groups.Contains(groupName))
         {
             await DisplayAlert("Ooops", "Incorrect name for the group ;c", "Try again");
-            isCheckedAntiLoop = true;
             AddToGroupCheckBox.IsChecked = false;
             return;
         }
@@ -117,12 +92,12 @@ public partial class CreateTimerPage : ContentPage
             bool isAddingToNewGroup = await DisplayAlert("Success", $"You created a group {groupName}!\n" +
                 $"Do you want to add this timer to {groupName}?", "Yes", "No");
             if (isAddingToNewGroup)
-                timer.groupName = groupName;
-            else
             {
-                isCheckedAntiLoop = true;
-                AddToGroupCheckBox.IsChecked = false;
+                timer.groupName = groupName;
+                AddToGroupCheckBox.IsChecked = true;
             }
+            else
+                AddToGroupCheckBox.IsChecked = false;
         }
     }
 
