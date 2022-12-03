@@ -44,6 +44,7 @@ public partial class CreateTimerPage : ContentPage
             isAlarm = false;
         }
     }
+
     private async void AddToGroupCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
         // returns choosed action in string type
@@ -56,7 +57,7 @@ public partial class CreateTimerPage : ContentPage
         else if (AddToGroupCheckBox.IsChecked)
         {
             string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", TTimer.Groups.ToArray());
-            if (action == "Cancel")
+            if (action == "Cancel" || string.IsNullOrWhiteSpace(action))
             {
                 AddToGroupCheckBox.IsChecked = false;
                 return;
@@ -77,7 +78,7 @@ public partial class CreateTimerPage : ContentPage
             }
         }
     }
-    async void AddNewGroup() // написать логику таймеров и дальше вывести их на экр
+    async void AddNewGroup() 
     {
         string groupName = await DisplayPromptAsync("Add group", "Input desired group name.");
         if (string.IsNullOrWhiteSpace(groupName) || TTimer.Groups.Contains(groupName))
@@ -108,7 +109,7 @@ public partial class CreateTimerPage : ContentPage
         if (isAlarm == false)
         {
             timer.TimerTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
-            timer.doNotDistub = doNotDisturb;
+            timer.doNotDisturb = doNotDisturb;
             if (run)
             {
                 timer.isRunning = true;
@@ -130,7 +131,7 @@ public partial class CreateTimerPage : ContentPage
                 return;
             }
 
-            timer.doNotDistub = doNotDisturb;
+            timer.doNotDisturb = doNotDisturb;
             if (run)
             {
                 timer.isRunning = true;
