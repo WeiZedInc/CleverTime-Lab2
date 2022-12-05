@@ -1,23 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CleverTime.MainPage">
+             x:Class="CleverTime.MainPage"
+             xmlns:viewmodel="clr-namespace:CleverTime"
+             x:DataType="viewmodel:MainVM">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Spacing="25"
-            Padding="30,0"
-            VerticalOptions="Start"
-            x:Name="RootLayout">
+    <!-- row = vertical-->
+    <Grid RowDefinitions="Auto, Auto"
+          HorizontalOptions="Center"
+          ColumnDefinitions="Auto"
+          Padding="10"
+          RowSpacing="10"
+          ColumnSpacing="10">
 
-            <Button
+        <Button Grid.Column="1"
                 x:Name="CreateTimerButton"
                 Text="Add Timer"
                 Clicked="OnCreateTimer_Clicked"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Start" />
 
-            
-        </VerticalStackLayout>
-    </ScrollView>
+
+        <CollectionView Grid.Row="1" Grid.Column="1"
+                        ItemsSource="{Binding Groups}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type x:String}"/>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+          
 
 </ContentPage>

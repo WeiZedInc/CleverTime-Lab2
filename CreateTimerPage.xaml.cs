@@ -56,7 +56,7 @@ public partial class CreateTimerPage : ContentPage
         }
         else if (AddToGroupCheckBox.IsChecked)
         {
-            string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", TTimer.Groups.ToArray());
+            string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", MainVM.groups.ToArray());
             if (action == "Cancel" || string.IsNullOrWhiteSpace(action))
             {
                 AddToGroupCheckBox.IsChecked = false;
@@ -81,7 +81,7 @@ public partial class CreateTimerPage : ContentPage
     async void AddNewGroup() 
     {
         string groupName = await DisplayPromptAsync("Add group", "Input desired group name.");
-        if (string.IsNullOrWhiteSpace(groupName) || TTimer.Groups.Contains(groupName))
+        if (string.IsNullOrWhiteSpace(groupName) || MainVM.groups.Contains(groupName))
         {
             await DisplayAlert("Ooops", "Incorrect name for the group ;c", "Try again");
             AddToGroupCheckBox.IsChecked = false;
@@ -89,7 +89,7 @@ public partial class CreateTimerPage : ContentPage
         }
         else
         {
-            TTimer.Groups.Add(groupName);
+            MainVM.groups.Add(groupName);
             bool isAddingToNewGroup = await DisplayAlert("Success", $"You created a group {groupName}!\n" +
                 $"Do you want to add this timer to {groupName}?", "Yes", "No");
             if (isAddingToNewGroup)
@@ -140,7 +140,7 @@ public partial class CreateTimerPage : ContentPage
             else
                 timer.isRunning = false;
         }
-        TTimer.AllTimers.TryAdd(timer.groupName, timer);
+        MainVM.allTimers.Add(timer);
     }
 
     #region Layouts
