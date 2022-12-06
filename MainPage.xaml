@@ -11,7 +11,8 @@
           ColumnDefinitions="Auto"
           Padding="10"
           RowSpacing="10"
-          ColumnSpacing="10">
+          ColumnSpacing="10"
+          >
 
         <Button Grid.Column="1"
                 x:Name="CreateTimerButton"
@@ -20,13 +21,27 @@
                 HorizontalOptions="Start" />
 
 
-        <CollectionView Grid.Row="1" Grid.Column="1"
-                        ItemsSource="{Binding Groups}">
+        <CollectionView  Grid.Row="1" Grid.Column="1"
+                        ItemsSource="{Binding AllTimers}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="{x:Type x:String}"/>
+                <DataTemplate x:DataType="viewmodel:TTimer">
+                    <Frame>
+                        <Grid>
+                            <Label Text="{Binding Name}"/>
+                            <Label Text="{Binding GroupName}"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
             </CollectionView.ItemTemplate>
+
         </CollectionView>
     </Grid>
-          
+
 
 </ContentPage>
+
+
+
+<!--<CollectionView  Grid.Row="1" Grid.Column="1"
+                        ItemsSource="{Binding Groups}">
+</CollectionView>-->

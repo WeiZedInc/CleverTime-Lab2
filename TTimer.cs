@@ -19,8 +19,9 @@ namespace CleverTime
         public bool isRunning { get; set; }
         public bool isAlarm { get; set; }
         public bool doNotDisturb { get; set; }
-        public string groupName = DEFAULT_GROUP;
-        public string Name, Description;
+        public string GroupName { get; set; } = DEFAULT_GROUP;
+        public string Name { get; set; }
+        public string Description;
 
         public async static void ShowToast(string text = "I'm a toast", ToastDuration duration = ToastDuration.Short, int
         textSize = 14, CancellationTokenSource cTs = null)

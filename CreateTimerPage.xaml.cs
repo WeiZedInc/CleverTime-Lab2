@@ -18,11 +18,14 @@ public partial class CreateTimerPage : ContentPage
     bool isAlarm = false;
     bool doNotDisturb = false;
 
+    readonly MainVM mainVM;
+
     public CreateTimerPage()
 	{
 		InitializeComponent();
         DrawTimerGrid();
         timer = new TTimer();
+        mainVM = ServiceHelper.GetService<MainVM>();
     }
 
     private void NameInput_Completed(object sender, EventArgs e) => TimerName = NameInput.Text;
@@ -50,13 +53,13 @@ public partial class CreateTimerPage : ContentPage
         // returns choosed action in string type
         if (AddToGroupCheckBox.IsChecked == false) // to avoid event looping
         {
-            if (timer.groupName != TTimer.DEFAULT_GROUP)
-                timer.groupName = TTimer.DEFAULT_GROUP;
+            if (timer.GroupName != TTimer.DEFAULT_GROUP)
+                timer.GroupName = TTimer.DEFAULT_GROUP;
             return;
         }
         else if (AddToGroupCheckBox.IsChecked)
         {
-            string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", MainVM.groups.ToArray());
+            string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", mainVM.Groups.ToArray());
             if (action == "Cancel" || string.IsNullOrWhiteSpace(action))
             {
                 AddToGroupCheckBox.IsChecked = false;
@@ -69,19 +72,19 @@ public partial class CreateTimerPage : ContentPage
             else if (action == TTimer.DEFAULT_GROUP)
             {
                 AddToGroupCheckBox.IsChecked = false;
-                timer.groupName = TTimer.DEFAULT_GROUP;
+                timer.GroupName = TTimer.DEFAULT_GROUP;
             }
             else
             {
                 AddToGroupCheckBox.IsChecked = true;
-                timer.groupName = action;
+                timer.GroupName = action;
             }
         }
     }
     async void AddNewGroup() 
     {
         string groupName = await DisplayPromptAsync("Add group", "Input desired group name.");
-        if (string.IsNullOrWhiteSpace(groupName) || MainVM.groups.Contains(groupName))
+        if (string.IsNullOrWhiteSpace(groupName) || mainVM.Groups.Contains(groupName))
         {
             await DisplayAlert("Ooops", "Incorrect name for the group ;c", "Try again");
             AddToGroupCheckBox.IsChecked = false;
@@ -89,12 +92,12 @@ public partial class CreateTimerPage : ContentPage
         }
         else
         {
-            MainVM.groups.Add(groupName);
+            mainVM.Groups.Add(groupName);
             bool isAddingToNewGroup = await DisplayAlert("Success", $"You created a group {groupName}!\n" +
                 $"Do you want to add this timer to {groupName}?", "Yes", "No");
             if (isAddingToNewGroup)
             {
-                timer.groupName = groupName;
+                timer.GroupName = groupName;
                 AddToGroupCheckBox.IsChecked = true;
             }
             else
@@ -140,7 +143,7 @@ public partial class CreateTimerPage : ContentPage
             else
                 timer.isRunning = false;
         }
-        MainVM.allTimers.Add(timer);
+        mainVM.AllTimers.Add(timer);
     }
 
     #region Layouts

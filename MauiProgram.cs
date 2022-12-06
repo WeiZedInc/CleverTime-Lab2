@@ -18,6 +18,11 @@ public static class MauiProgram
 
         Routing.RegisterRoute("CreateTimerPage", typeof(CreateTimerPage));
 
+        builder.Services.AddSingleton<MainPage>();
+        builder.Services.AddSingleton<MainVM>();
+
+        builder.Services.AddSingleton<CreateTimerPage>();
+
         return builder.Build();
 	}
 }

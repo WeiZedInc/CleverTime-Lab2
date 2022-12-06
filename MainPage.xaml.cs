@@ -5,7 +5,7 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         InitializeComponent();
-        BindingContext = new MainVM();
+        BindingContext = ServiceHelper.GetService<MainVM>();
     }
 
     private async void OnCreateTimer_Clicked(object sender, EventArgs e)

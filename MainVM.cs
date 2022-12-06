@@ -1,28 +1,24 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CleverTime
 {
     public partial class MainVM : ObservableObject
     {
-        [ObservableProperty]
-        public static ObservableCollection<TTimer> allTimers;
-        [ObservableProperty]
-        public static List<string> groups;
+        public ObservableCollection<TTimer> AllTimers { get; set; } = new();
+        public ObservableCollection<string> Groups { get; set; } = new();
 
 
-        public static bool isGroupsEmpty() => groups.Count == 1 ? true : false;
-
-        static MainVM()
+        public static bool isGroupsEmpty()
         {
-            allTimers = new();
-            groups = new() { TTimer.DEFAULT_GROUP };
+            var sHelper = ServiceHelper.GetService<MainVM>();
+            return sHelper.Groups.Count == 1 ? true : false;
         }
 
+        public MainVM()
+        {
+            Groups.Add("123");
+            Groups.Add("3232");
+        }
     }
 }
