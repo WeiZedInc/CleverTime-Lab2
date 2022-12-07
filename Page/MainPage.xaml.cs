@@ -4,15 +4,14 @@ namespace CleverTime;
 
 public partial class MainPage : ContentPage
 {
-    DetailsPage detailsPage;
     MainVM mainVM;
+    public static TTimer timer = null; 
 
     public MainPage()
     {
         InitializeComponent();
         mainVM = ServiceHelper.GetService<MainVM>();
         BindingContext = mainVM;
-        detailsPage = ServiceHelper.GetService<DetailsPage>();
     }
 
     private async void OnCreateTimer_Clicked(object sender, EventArgs e) => 
@@ -21,8 +20,8 @@ public partial class MainPage : ContentPage
     private async void TapGestureRecognizer_Tapped(object sender, EventArgs e)
     {
         var frame = (Frame)sender;
-        detailsPage.Timer = FindTimerByName(frame.ClassId);
-        await Shell.Current.GoToAsync("DetailsPage"); //  надо открыть страницу, потом присвоить таймер, оно не может присвоить пока страничка не прогрузилась
+        timer = FindTimerByName(frame.ClassId); 
+        await Shell.Current.GoToAsync("DetailsPage"); 
     }
 
     TTimer FindTimerByName(string name) =>

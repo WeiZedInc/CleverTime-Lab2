@@ -4,7 +4,7 @@ namespace CleverTime;
 
 public partial class DetailsPage : ContentPage
 {
-    public TTimer Timer;
+    public TTimer Timer = null;
 
     Label toTickHoursLabel, toTickMinutesLabel, toTickSecondsLabel;
     Slider toTickHoursSlider, toTickMinutesSlider, toTickSecondsSlider;
@@ -25,8 +25,10 @@ public partial class DetailsPage : ContentPage
     {
         InitializeComponent();
         mainVM = ServiceHelper.GetService<MainVM>();
+        Timer = MainPage.timer;
         if (Timer == null)
             return;
+
 
         NameInput.Text = Timer.Name;
         DescriptionInput.Text = Timer.Description;
