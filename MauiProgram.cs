@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui;
+﻿using CleverTime.VM;
+using CommunityToolkit.Maui;
 
 namespace CleverTime;
 
@@ -17,9 +18,13 @@ public static class MauiProgram
 			});
 
         Routing.RegisterRoute("CreateTimerPage", typeof(CreateTimerPage));
+        Routing.RegisterRoute("DetailsPage", typeof(DetailsPage));
 
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<MainVM>();
+
+        builder.Services.AddTransient<DetailsPage>();
+        builder.Services.AddTransient<DetailsVM>();
 
         builder.Services.AddSingleton<CreateTimerPage>();
 

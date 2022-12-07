@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CleverTime.MainPage"
+             xmlns:viewmodel="clr-namespace:CleverTime.VM"
+             xmlns:timer="clr-namespace:CleverTime"
+             x:DataType="viewmodel:MainVM">
+
+    <StackLayout 
+          HorizontalOptions="FillAndExpand"
+          Padding="10"
+          Margin="10">
+
+        <Button x:Name="CreateTimerButton"
+                Text="Add Timer"
+                Clicked="OnCreateTimer_Clicked"
+                HorizontalOptions="Center"
+                BackgroundColor="Violet"
+                TextColor="White"
+                TextTransform="Uppercase"/>
+        
+        <Label Text="Timer"
+               HorizontalOptions="Start"/>
+        <Label Text="Group"
+               HorizontalOptions="Center"/>
+        <Label Text="Time"
+               HorizontalOptions="End"/>
+        
+        <CollectionView  ItemsSource="{Binding AllTimers}"
+                         SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="timer:TTimer">
+                    <Frame HorizontalOptions="FillAndExpand"
+                           BackgroundColor="Gray">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                        </Frame.GestureRecognizers>
+                        <Grid>
+                            <Label Text="{Binding Name}"
+                                   HorizontalOptions="Start"/>
+                            <Label Text="{Binding GroupName} "
+                                   HorizontalOptions="Center"/>
+                            <Label Text="{Binding Description} "
+                                   HorizontalOptions="End"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </StackLayout> 
+
+
+</ContentPage>
+
+
+
+<!--<CollectionView  Grid.Row="1" Grid.Column="1"
+                        ItemsSource="{Binding Groups}">
+</CollectionView>-->

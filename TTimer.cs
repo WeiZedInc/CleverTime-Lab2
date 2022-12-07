@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Font = Microsoft.Maui.Font;
 
 namespace CleverTime
@@ -11,6 +10,19 @@ namespace CleverTime
         //2.ручний інтерфейс для перегляду списку таймерів, керування таймерами, реалізувати як один список, можливо з додатковою фільтрацією
         //3.Звуковий та візуальний сигнал по завершенню часу.
         //4.Можливість виконання певних налаштовуваних дій по завершенню часу(наприклад, запуск програми чи відкриття документу).
+        public TTimer(DateTime startTickTime = default, DateTime alarmDateTime= default, TimeSpan timerTimeToTick= default, 
+            bool isRunning = false, bool isAlarm = false, bool doNotDisturb = false, string groupName = DEFAULT_GROUP, string name = "test", string description = "test descr")
+        {
+            StartTickTime = startTickTime; 
+            AlarmDateTime = alarmDateTime;
+            TimerTimeToTick = timerTimeToTick;
+            this.isRunning = isRunning;
+            this.isAlarm= isAlarm;
+            this.doNotDisturb= doNotDisturb;
+            GroupName= groupName;
+            Name= name;
+            Description= description;
+        }
         
         public const string DEFAULT_GROUP = "default";
         public DateTime StartTickTime { get; set; }
@@ -21,7 +33,7 @@ namespace CleverTime
         public bool doNotDisturb { get; set; }
         public string GroupName { get; set; } = DEFAULT_GROUP;
         public string Name { get; set; }
-        public string Description;
+        public string Description { get; set; }
 
         public async static void ShowToast(string text = "I'm a toast", ToastDuration duration = ToastDuration.Short, int
         textSize = 14, CancellationTokenSource cTs = null)

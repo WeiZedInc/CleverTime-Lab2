@@ -1,4 +1,6 @@
-﻿namespace CleverTime;
+﻿using CleverTime.VM;
+
+namespace CleverTime;
 
 public partial class MainPage : ContentPage
 {
@@ -14,5 +16,9 @@ public partial class MainPage : ContentPage
         //SemanticScreenReader.Announce(CounterBtn.Text);
     }
 
+    private async void TapGestureRecognizer_Tapped(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync("DetailsPage");
+    }
 }
 

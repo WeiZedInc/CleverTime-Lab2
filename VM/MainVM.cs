@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 
-namespace CleverTime
+namespace CleverTime.VM
 {
     public partial class MainVM : ObservableObject
     {
@@ -11,14 +11,15 @@ namespace CleverTime
 
         public static bool isGroupsEmpty()
         {
-            var sHelper = ServiceHelper.GetService<MainVM>();
+            var sHelper = ServiceHelper.GetService<MainVM>(); // через хелпера юзать вызывать всё
             return sHelper.Groups.Count == 1 ? true : false;
         }
 
         public MainVM()
         {
-            Groups.Add("123");
-            Groups.Add("3232");
+            Groups.Add(TTimer.DEFAULT_GROUP);
+            AllTimers.Add(new TTimer());
+            AllTimers.Add(new TTimer(name: "test3"));
         }
     }
 }
