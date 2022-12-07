@@ -1,12 +1,62 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CleverTime.DetailsPage"
-             Title="DetailsPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             x:Class="CleverTime.DetailsPage">
+
+    <StackLayout Orientation="Vertical" x:Name="RootLayout">
+
+
+
+        <StackLayout Orientation="Vertical" x:Name="InputsLayout" Margin="10" Spacing="10">
+
+            <Entry x:Name="NameInput"
+            Placeholder="Input incredible name"
+            Completed="NameInput_Completed" />
+
+            <Entry x:Name="DescriptionInput"
+            Placeholder="Input description"
+            Completed="DescriptionInput_Completed" />
+
+            <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
+                <Label VerticalOptions="Center"
+                 Text="Make an alarm"/>
+                <CheckBox 
+                  x:Name="MakeAlarmCheckBox"
+                  IsChecked="False" 
+                  CheckedChanged="isAlarm_CheckedChanged"/>
+
+                <Label VerticalOptions="Center"
+                  Text="Add to group:"/>
+                <CheckBox 
+                  x:Name="AddToGroupCheckBox"
+                  IsChecked="False" 
+                 CheckedChanged="AddToGroupCheckBox_CheckedChanged"/>
+
+                <Label VerticalOptions="Center"
+                  Text="Do not disturb:"/>
+                <CheckBox 
+                  x:Name="doNotDisturbCheckBox"
+                  IsChecked="False" 
+                 CheckedChanged="doNotDisturbCheckBox_CheckedChanged"/>
+
+            </HorizontalStackLayout>
+
+
+        </StackLayout>
+
+        <HorizontalStackLayout Margin="10" Spacing="10" HorizontalOptions="CenterAndExpand">
+            <Button
+            x:Name="SaveButton"
+            Text="Save"
+                Clicked="SaveButton_Clicked">
+            </Button>
+
+            <Button
+            x:Name="DeleteButton"
+            Text="Delete"
+                Clicked="DeleteButton_Clicked">
+            </Button>
+        </HorizontalStackLayout>
+
+    </StackLayout>
 </ContentPage>

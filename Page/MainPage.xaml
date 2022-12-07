@@ -31,7 +31,8 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="timer:TTimer">
                     <Frame HorizontalOptions="FillAndExpand"
-                           BackgroundColor="Gray">
+                           BackgroundColor="Gray"
+                           ClassId="{Binding Name}">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
                         </Frame.GestureRecognizers>

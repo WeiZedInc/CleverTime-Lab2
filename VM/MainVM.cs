@@ -18,7 +18,7 @@ namespace CleverTime.VM
         public MainVM()
         {
             Groups.Add(TTimer.DEFAULT_GROUP);
-            AllTimers.Add(new TTimer());
+            AllTimers.Add(new TTimer(isAlarm:true));
             AllTimers.Add(new TTimer(name: "test3"));
         }
     }

@@ -24,8 +24,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<MainVM>();
 
         builder.Services.AddTransient<DetailsPage>();
-        builder.Services.AddTransient<DetailsVM>();
-
         builder.Services.AddSingleton<CreateTimerPage>();
 
         return builder.Build();

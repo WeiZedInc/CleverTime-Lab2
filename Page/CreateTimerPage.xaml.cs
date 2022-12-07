@@ -5,7 +5,6 @@ namespace CleverTime;
 public partial class CreateTimerPage : ContentPage
 {
     TTimer timer;
-    string TimerName, TimerDescription;
 
     Label toTickHoursLabel, toTickMinutesLabel, toTickSecondsLabel;
     Slider toTickHoursSlider, toTickMinutesSlider, toTickSecondsSlider;
@@ -30,8 +29,8 @@ public partial class CreateTimerPage : ContentPage
         mainVM = ServiceHelper.GetService<MainVM>();
     }
 
-    private void NameInput_Completed(object sender, EventArgs e) => TimerName = NameInput.Text;
-    private void DescriptionInput_Completed(object sender, EventArgs e) => TimerDescription = DescriptionInput.Text;
+    private void NameInput_Completed(object sender, EventArgs e) => timer.Name = NameInput.Text;
+    private void DescriptionInput_Completed(object sender, EventArgs e) => timer.GroupName = DescriptionInput.Text;
 
     private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e) => doNotDisturb = !doNotDisturb;
     private void isAlarm_CheckedChanged(object sender, CheckedChangedEventArgs e)
