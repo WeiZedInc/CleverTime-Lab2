@@ -18,14 +18,14 @@
                 BackgroundColor="Violet"
                 TextColor="White"
                 TextTransform="Uppercase"/>
-        
+
         <Label Text="Timer"
                HorizontalOptions="Start"/>
         <Label Text="Group"
                HorizontalOptions="Center"/>
         <Label Text="Time"
                HorizontalOptions="End"/>
-        
+
         <CollectionView  ItemsSource="{Binding AllTimers}"
                          SelectionMode="None">
             <CollectionView.ItemTemplate>
@@ -48,13 +48,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-    </StackLayout> 
+    </StackLayout>
 
 
 </ContentPage>
-
-
-
-<!--<CollectionView  Grid.Row="1" Grid.Column="1"
-                        ItemsSource="{Binding Groups}">
-</CollectionView>-->

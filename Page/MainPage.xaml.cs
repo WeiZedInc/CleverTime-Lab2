@@ -20,9 +20,9 @@ public partial class MainPage : ContentPage
 
     private async void TapGestureRecognizer_Tapped(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("DetailsPage");
         var frame = (Frame)sender;
-        detailsPage.timer = FindTimerByName(frame.ClassId);
+        detailsPage.Timer = FindTimerByName(frame.ClassId);
+        await Shell.Current.GoToAsync("DetailsPage"); //  надо открыть страницу, потом присвоить таймер, оно не может присвоить пока страничка не прогрузилась
     }
 
     TTimer FindTimerByName(string name) =>

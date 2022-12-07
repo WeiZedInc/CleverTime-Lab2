@@ -4,7 +4,7 @@ namespace CleverTime;
 
 public partial class DetailsPage : ContentPage
 {
-    public TTimer timer { get; set; } = new TTimer();
+    public TTimer Timer;
 
     Label toTickHoursLabel, toTickMinutesLabel, toTickSecondsLabel;
     Slider toTickHoursSlider, toTickMinutesSlider, toTickSecondsSlider;
@@ -16,55 +16,38 @@ public partial class DetailsPage : ContentPage
     TimePicker timePicker;
     DatePicker datePicker;
 
-    bool isAlarm = false;
     bool doNotDisturb = false;
 
     readonly MainVM mainVM;
 
-    
 
     public DetailsPage()
     {
         InitializeComponent();
         mainVM = ServiceHelper.GetService<MainVM>();
+        if (Timer == null)
+            return;
 
-        NameInput.Text = timer.Name;
-        DescriptionInput.Text = timer.Description;
+        NameInput.Text = Timer.Name;
+        DescriptionInput.Text = Timer.Description;
 
-        if (timer.isAlarm)
+        if (Timer.isAlarm)
             DrawAlarmLayout();
         else
             DrawTimerGrid();
-
     }
 
-    private void NameInput_Completed(object sender, EventArgs e) => timer.Name = NameInput.Text;
-    private void DescriptionInput_Completed(object sender, EventArgs e) => timer.Description = DescriptionInput.Text;
+    private void NameInput_Completed(object sender, EventArgs e) => Timer.Name = NameInput.Text;
+    private void DescriptionInput_Completed(object sender, EventArgs e) => Timer.Description = DescriptionInput.Text;
 
     private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e) => doNotDisturb = !doNotDisturb;
-    private void isAlarm_CheckedChanged(object sender, CheckedChangedEventArgs e)
-    {
-        if (e.Value == true)
-        {
-            InputsLayout.Remove(TimerGrid);
-            DrawAlarmLayout();
-            isAlarm = true;
-        }
-        else
-        {
-            InputsLayout.Remove(AlarmLayout);
-            DrawTimerGrid();
-            isAlarm = false;
-        }
-    }
-
     private async void AddToGroupCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
         // returns choosed action in string type
         if (AddToGroupCheckBox.IsChecked == false) // to avoid event looping
         {
-            if (timer.GroupName != TTimer.DEFAULT_GROUP)
-                timer.GroupName = TTimer.DEFAULT_GROUP;
+            if (Timer.GroupName != TTimer.DEFAULT_GROUP)
+                Timer.GroupName = TTimer.DEFAULT_GROUP;
             return;
         }
         else if (AddToGroupCheckBox.IsChecked)
@@ -82,12 +65,12 @@ public partial class DetailsPage : ContentPage
             else if (action == TTimer.DEFAULT_GROUP)
             {
                 AddToGroupCheckBox.IsChecked = false;
-                timer.GroupName = TTimer.DEFAULT_GROUP;
+                Timer.GroupName = TTimer.DEFAULT_GROUP;
             }
             else
             {
                 AddToGroupCheckBox.IsChecked = true;
-                timer.GroupName = action;
+                Timer.GroupName = action;
             }
         }
     }
@@ -107,7 +90,7 @@ public partial class DetailsPage : ContentPage
                 $"Do you want to add this timer to {groupName}?", "Yes", "No");
             if (isAddingToNewGroup)
             {
-                timer.GroupName = groupName;
+                Timer.GroupName = groupName;
                 AddToGroupCheckBox.IsChecked = true;
             }
             else
@@ -123,30 +106,14 @@ public partial class DetailsPage : ContentPage
         bool answer = await DisplayAlert("Attention", "Are you sure to delete timer?", "Yes", "No");
         if (answer)
         {
-            var sosig=  mainVM.AllTimers.Remove(timer);
-            var test = 1;
-            await Shell.Current.GoToAsync("MainPage");
+            mainVM.AllTimers.Remove(mainVM.AllTimers.Where(i => i.Name == Timer.Name).Single());
+            await Shell.Current.GoToAsync("../");
         }
     }
-    async void SaveTimer()
+    async void SaveTimer() // если не передавать екземпл€ром - перезапись
     {
-        if (isAlarm == false)
-        {
-            timer.TimerTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
-            timer.doNotDisturb = doNotDisturb;
-        }
-        else // if alarm
-        {
-            if (datePicker.Date == DateTime.Today && timePicker.Time <= DateTime.Now.TimeOfDay)
-            {
-                await DisplayAlert("Ooops", "You cant confirm time which had already past ;c" +
-                    "\nTime switched to most closerly possible.", "Try again");
-                timePicker.Time = DateTime.Now.TimeOfDay.Add(new TimeSpan(0, 1, 0));
-                return;
-            }
-
-            timer.doNotDisturb = doNotDisturb;
-        }
+        mainVM.AllTimers.Remove(mainVM.AllTimers.Where(i => i.Name == Timer.Name).Single());
+        mainVM.AllTimers.Add(Timer);
     }
 
     #region Layouts
@@ -168,6 +135,7 @@ public partial class DetailsPage : ContentPage
                 new RowDefinition()
             }
         };
+
 
         toTickHoursSlider = new Slider();
         toTickHoursSlider.ValueChanged += OnHoursSliderChanged;

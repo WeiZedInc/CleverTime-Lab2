@@ -18,12 +18,6 @@
             Completed="DescriptionInput_Completed" />
 
             <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
-                <Label VerticalOptions="Center"
-                 Text="Make an alarm"/>
-                <CheckBox 
-                  x:Name="MakeAlarmCheckBox"
-                  IsChecked="False" 
-                  CheckedChanged="isAlarm_CheckedChanged"/>
 
                 <Label VerticalOptions="Center"
                   Text="Add to group:"/>
