@@ -18,6 +18,7 @@ public partial class DetailsPage : ContentPage
 
     bool doNotDisturb = false;
 
+    readonly MainPage MainPage;
     readonly MainVM mainVM;
 
 
@@ -25,6 +26,7 @@ public partial class DetailsPage : ContentPage
     {
         InitializeComponent();
         mainVM = ServiceHelper.GetService<MainVM>();
+        MainPage = ServiceHelper.GetService<MainPage>();
         Timer = MainPage.timer;
         if (Timer == null)
             return;
@@ -122,9 +124,58 @@ public partial class DetailsPage : ContentPage
     }
     async void SaveTimer()
     {
-        var id = mainVM.AllTimers.IndexOf(mainVM.AllTimers.Where(i => i.Name == MainPage.timer.Name).Single());
-        mainVM.AllTimers[id] = Timer;
-        await Shell.Current.GoToAsync("../");
+        try
+        {
+            if (Timer.isAlarm == false)
+            {
+                var timeToTick = new TimeSpan(hoursToTick, minutesToTick, secondsToTick);
+                Timer.TimeToEndTicking = new DateTime().Add(timeToTick);
+                if (Timer.isRunning)
+                {
+                    Timer.isRunning = true;
+                    Timer.TickingStartedDateTime = DateTime.Now;
+                    Timer.SetupTimer(timeToTick, start: true);
+
+                }
+                else
+                {
+                    Timer.isRunning = false;
+                    Timer.TickingStartedDateTime = default;
+                }
+            }
+            else // if alarm
+            {
+                if (datePicker.Date == DateTime.Today && timePicker.Time <= DateTime.Now.TimeOfDay)
+                {
+                    await DisplayAlert("Ooops", "You cant confirm time which had already past ;c" +
+                        "\nTime switched to most closerly possible.", "Try again");
+                    timePicker.Time = DateTime.Now.TimeOfDay.Add(new TimeSpan(0, 1, 0));
+                    return;
+                }
+
+                Timer.doNotDisturb = doNotDisturb;
+                if (Timer.isRunning)
+                {
+                    Timer.isRunning = true;
+                    Timer.TickingStartedDateTime = DateTime.Now;
+                }
+                else
+                {
+                    Timer.isRunning = false;
+                    Timer.TickingStartedDateTime = default;
+                }
+                Timer.WhenToAlarmDateTime = datePicker.Date.Add(timePicker.Time);
+                Timer.TimeToEndTicking = Timer.WhenToAlarmDateTime;
+            }
+            var id = mainVM.AllTimers.IndexOf(mainVM.AllTimers.Where(i => i.Name == MainPage.timer.Name).Single());
+            mainVM.AllTimers[id] = Timer;
+            MainPage.UpdateVisual();
+            await Shell.Current.GoToAsync("../");
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     #region Layouts
