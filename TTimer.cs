@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-using Font = Microsoft.Maui.Font;
+﻿using System.Timers;
 
 namespace CleverTime
 {
@@ -10,61 +8,76 @@ namespace CleverTime
         //2.ручний інтерфейс для перегляду списку таймерів, керування таймерами, реалізувати як один список, можливо з додатковою фільтрацією
         //3.Звуковий та візуальний сигнал по завершенню часу.
         //4.Можливість виконання певних налаштовуваних дій по завершенню часу(наприклад, запуск програми чи відкриття документу).
+
         public TTimer(DateTime startTickTime = default, DateTime alarmDateTime= default, TimeSpan timerTimeToTick= default, 
             bool isRunning = false, bool isAlarm = false, bool doNotDisturb = false, string groupName = DEFAULT_GROUP, string name = "test", string description = "test descr")
         {
-            StartTickTime = startTickTime; 
-            AlarmDateTime = alarmDateTime;
-            TimerTimeToTick = timerTimeToTick;
+            TickingStartedDateTime = startTickTime; 
+            WhenToAlarmDateTime = alarmDateTime;
+            this.isAlarm = isAlarm;
             this.isRunning = isRunning;
-            this.isAlarm= isAlarm;
-            this.doNotDisturb= doNotDisturb;
-            GroupName= groupName;
-            Name= name;
-            Description= description;
+            this.doNotDisturb = doNotDisturb;
+            GroupName = groupName;
+            Name = name;
+            Description = description;
+
+            if (isAlarm)
+                TimeToEndTicking = alarmDateTime;
+            else
+                TimeToEndTicking.Add(timerTimeToTick);
         }
         
         public const string DEFAULT_GROUP = "default";
-        public DateTime StartTickTime { get; set; }
-        public DateTime AlarmDateTime { get; set; }
-        public TimeSpan TimerTimeToTick { get; set; } // hh,mm,ss
         public bool isRunning { get; set; }
         public bool isAlarm { get; set; }
         public bool doNotDisturb { get; set; }
         public string GroupName { get; set; } = DEFAULT_GROUP;
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
+        public System.Timers.Timer Timer { get; set; }
+        public DateTime TickingStartedDateTime { get; set; } // always
+        public DateTime WhenToAlarmDateTime { get; set; } // if alarm
+        public DateTime TimeToEndTicking { get; set; } // if timer  (gonna be for visual)
+        public DateTime CurrentGoneTime { get; set; } = default; // need to be calculated
 
-        public async static void ShowToast(string text = "I'm a toast", ToastDuration duration = ToastDuration.Short, int
-        textSize = 14, CancellationTokenSource cTs = null)
+        public static void OnTimerEvent(Object source, ElapsedEventArgs e)
         {
-            if (cTs == null)
-                cTs = new CancellationTokenSource();
-
-            await Toast.Make(text, duration, textSize).Show(cTs.Token);
+            PopUps.ShowToast(text: "timer");
         }
 
-        public async static void ShowSnackBar(string text = "This is a Snackbar", string actionButtonText = "Click Here to Dismiss",
-            Action action = null, CancellationTokenSource cTs = null)
+        public static void OnAlarmEvent(Object source, ElapsedEventArgs e)
         {
-            if (cTs == null)
-                cTs = new CancellationTokenSource();
+            PopUps.ShowToast(text: "alarm");
+        }
 
-            var snackbarOptions = new SnackbarOptions
+        async Task StartVisualTimerTicker()
+        {
+            var second = new TimeSpan(0, 0, 1);
+            while (TimeToEndTicking.Subtract(DateTime.Now) != TimeSpan.Zero)
             {
-                BackgroundColor = Colors.Red,
-                TextColor = Colors.Green,
-                ActionButtonTextColor = Colors.Yellow,
-                CornerRadius = new CornerRadius(10),
-                Font = Font.SystemFontOfSize(14),
-                ActionButtonFont = Font.SystemFontOfSize(14),
-                CharacterSpacing = 0.5
-            };
-
-            TimeSpan duration = TimeSpan.FromSeconds(3);
-            await Snackbar.Make(text, action, actionButtonText, duration, snackbarOptions).Show(cTs.Token);
+                TimeToEndTicking.Subtract(second);
+                await Task.Delay(1000);
+            }
         }
 
-        
+        private void SetupTimer(TimeSpan timeToTick, bool isRepeated = false, bool start = false)
+        {
+            Timer = new System.Timers.Timer(timeToTick);
+            Timer.Elapsed += TTimer.OnTimerEvent;
+            Timer.AutoReset = isRepeated;
+            if (start)
+            {
+                StartVisualTimerTicker();
+                Timer.Start();
+            }
+        }
+
+        private void SetupAlarm(DateTime endTime, bool isRepeated = false)
+        {
+            TimeSpan timeDifference = endTime.Subtract(DateTime.Now);
+            Timer = new System.Timers.Timer(timeDifference);
+            Timer.Elapsed += TTimer.OnAlarmEvent;
+            Timer.AutoReset = isRepeated;
+        }
     }
 }

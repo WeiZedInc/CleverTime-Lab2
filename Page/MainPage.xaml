@@ -18,13 +18,17 @@
                 BackgroundColor="Violet"
                 TextColor="White"
                 TextTransform="Uppercase"/>
-
-        <Label Text="Timer"
-               HorizontalOptions="Start"/>
-        <Label Text="Group"
-               HorizontalOptions="Center"/>
-        <Label Text="Time"
-               HorizontalOptions="End"/>
+        
+        <Grid ColumnDefinitions="*,*,*,*">
+            <Label Text="Timer"
+                   Grid.Column="0"/>
+            <Label Text="Group"
+                   Grid.Column="1"/>
+            <Label Text="Description"
+                   Grid.Column="2"/>
+            <Label Text="TickTime"
+                   Grid.Column="3"/>
+        </Grid>
 
         <CollectionView  ItemsSource="{Binding AllTimers}"
                          SelectionMode="None">
@@ -36,13 +40,15 @@
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
                         </Frame.GestureRecognizers>
-                        <Grid>
+                        <Grid ColumnDefinitions="*,*,*,*">
                             <Label Text="{Binding Name}"
-                                   HorizontalOptions="Start"/>
+                                   Grid.Column="0"/>
                             <Label Text="{Binding GroupName} "
-                                   HorizontalOptions="Center"/>
+                                   Grid.Column="1"/>
                             <Label Text="{Binding Description} "
-                                   HorizontalOptions="End"/>
+                                   Grid.Column="2"/>
+                            <Label Text="{Binding TimeToEndTicking}"
+                                   Grid.Column="3"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>

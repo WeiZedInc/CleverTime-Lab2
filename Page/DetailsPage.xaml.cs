@@ -39,8 +39,16 @@ public partial class DetailsPage : ContentPage
             DrawTimerGrid();
     }
 
-    private void NameInput_Completed(object sender, EventArgs e) => Timer.Name = NameInput.Text;
-    private void DescriptionInput_Completed(object sender, EventArgs e) => Timer.Description = DescriptionInput.Text;
+    private async void NameInput_Completed(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(NameInput.Text))
+        {
+            await DisplayAlert("Ooops", "Incorrect name ;c", "Try again");
+            return;
+        }
+        Timer.Name = NameInput.Text; 
+    }
+    private void DescriptionInput_Completed(object sender, EventArgs e) => Timer.Description = DescriptionInput.Text; 
 
     private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e) => doNotDisturb = !doNotDisturb;
     private async void AddToGroupCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
@@ -112,10 +120,11 @@ public partial class DetailsPage : ContentPage
             await Shell.Current.GoToAsync("../");
         }
     }
-    async void SaveTimer() // если не передавать екземпл€ром - перезапись
+    async void SaveTimer()
     {
-        mainVM.AllTimers.Remove(mainVM.AllTimers.Where(i => i.Name == Timer.Name).Single());
-        mainVM.AllTimers.Add(Timer);
+        var id = mainVM.AllTimers.IndexOf(mainVM.AllTimers.Where(i => i.Name == MainPage.timer.Name).Single());
+        mainVM.AllTimers[id] = Timer;
+        await Shell.Current.GoToAsync("../");
     }
 
     #region Layouts

@@ -22,26 +22,34 @@ public partial class CreateTimerPage : ContentPage
     readonly MainVM mainVM;
 
     public CreateTimerPage()
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         DrawTimerGrid();
         timer = new TTimer();
         mainVM = ServiceHelper.GetService<MainVM>();
     }
 
-    private void NameInput_Completed(object sender, EventArgs e) => timer.Name = NameInput.Text;
+    private async void NameInput_Completed(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(NameInput.Text))
+        {
+            await DisplayAlert("Ooops", "Incorrect name ;c", "Try again");
+            return;
+        }
+        timer.Name = NameInput.Text;
+    }
     private void DescriptionInput_Completed(object sender, EventArgs e) => timer.GroupName = DescriptionInput.Text;
 
     private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e) => doNotDisturb = !doNotDisturb;
     private void isAlarm_CheckedChanged(object sender, CheckedChangedEventArgs e)
-	{
-		if (e.Value == true)
-		{
+    {
+        if (e.Value == true)
+        {
             InputsLayout.Remove(TimerGrid);
             DrawAlarmLayout();
             isAlarm = true;
         }
-		else
+        else
         {
             InputsLayout.Remove(AlarmLayout);
             DrawTimerGrid();
@@ -82,7 +90,7 @@ public partial class CreateTimerPage : ContentPage
             }
         }
     }
-    async void AddNewGroup() 
+    async void AddNewGroup()
     {
         string groupName = await DisplayPromptAsync("Add group", "Input desired group name.");
         if (string.IsNullOrWhiteSpace(groupName) || mainVM.Groups.Contains(groupName))
@@ -110,19 +118,20 @@ public partial class CreateTimerPage : ContentPage
     private void SaveAndRunButton_Clicked(object sender, EventArgs e) => SaveTimer(true);
     async void SaveTimer(bool run)
     {
-        if (isAlarm == false)
+        if (timer.isAlarm == false)
         {
-            timer.TimerTimeToTick = new(hoursToTick, minutesToTick, secondsToTick);
+            timer.TimeToEndTicking = new DateTime(0,0,0).Add(new TimeSpan(hoursToTick, minutesToTick, secondsToTick));
             timer.doNotDisturb = doNotDisturb;
             if (run)
             {
                 timer.isRunning = true;
-                timer.StartTickTime = DateTime.Now;
+                timer.TickingStartedDateTime = DateTime.Now;
+
             }
             else
             {
                 timer.isRunning = false;
-                timer.StartTickTime = default;
+                timer.TickingStartedDateTime = default;
             }
         }
         else // if alarm
@@ -139,11 +148,18 @@ public partial class CreateTimerPage : ContentPage
             if (run)
             {
                 timer.isRunning = true;
-                timer.AlarmDateTime = datePicker.Date.Add(timePicker.Time);
+                timer.TickingStartedDateTime = DateTime.Now;
+                timer.WhenToAlarmDateTime = datePicker.Date.Add(timePicker.Time);
+                timer.TimeToEndTicking = timer.WhenToAlarmDateTime;
             }
             else
+            {
                 timer.isRunning = false;
+                timer.TickingStartedDateTime = default;
+                timer.TimeToEndTicking = timer.WhenToAlarmDateTime;
+            }
         }
+
         mainVM.AllTimers.Add(timer);
     }
 

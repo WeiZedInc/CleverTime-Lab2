@@ -5,7 +5,7 @@ namespace CleverTime.VM
 {
     public partial class MainVM : ObservableObject
     {
-        public ObservableCollection<TTimer>? AllTimers { get; set; } = new();
+        public ObservableCollection<TTimer> AllTimers { get; set; } = new();
         public ObservableCollection<string> Groups { get; set; } = new();
 
 
