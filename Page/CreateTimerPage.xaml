@@ -16,8 +16,7 @@
             TextChanged="NameInput_Completed" />
             
             <Entry x:Name="DescriptionInput"
-            Placeholder="Input description"
-            TextChanged="DescriptionInput_Completed" />
+            Placeholder="Input description"/>
 
             <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
                 <Label VerticalOptions="Center"

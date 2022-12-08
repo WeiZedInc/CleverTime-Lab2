@@ -4,8 +4,6 @@ namespace CleverTime;
 
 public partial class CreateTimerPage : ContentPage
 {
-    TTimer timer;
-
     Label toTickHoursLabel, toTickMinutesLabel, toTickSecondsLabel;
     Slider toTickHoursSlider, toTickMinutesSlider, toTickSecondsSlider;
 
@@ -20,12 +18,12 @@ public partial class CreateTimerPage : ContentPage
     bool doNotDisturb = false;
 
     readonly MainVM mainVM;
+    string GroupName = TTimer.DEFAULT_GROUP;
 
     public CreateTimerPage()
     {
         InitializeComponent();
         DrawTimerGrid();
-        timer = new TTimer();
         mainVM = ServiceHelper.GetService<MainVM>();
     }
 
@@ -36,9 +34,7 @@ public partial class CreateTimerPage : ContentPage
             await DisplayAlert("Ooops", "Incorrect name ;c", "Try again");
             return;
         }
-        timer.Name = NameInput.Text;
     }
-    private void DescriptionInput_Completed(object sender, EventArgs e) => timer.GroupName = DescriptionInput.Text;
 
     private void doNotDisturbCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e) => doNotDisturb = !doNotDisturb;
     private void isAlarm_CheckedChanged(object sender, CheckedChangedEventArgs e)
@@ -62,8 +58,8 @@ public partial class CreateTimerPage : ContentPage
         // returns choosed action in string type
         if (AddToGroupCheckBox.IsChecked == false) // to avoid event looping
         {
-            if (timer.GroupName != TTimer.DEFAULT_GROUP)
-                timer.GroupName = TTimer.DEFAULT_GROUP;
+            if (GroupName != TTimer.DEFAULT_GROUP)
+                GroupName = TTimer.DEFAULT_GROUP;
             return;
         }
         else if (AddToGroupCheckBox.IsChecked)
@@ -81,12 +77,12 @@ public partial class CreateTimerPage : ContentPage
             else if (action == TTimer.DEFAULT_GROUP)
             {
                 AddToGroupCheckBox.IsChecked = false;
-                timer.GroupName = TTimer.DEFAULT_GROUP;
+                GroupName = TTimer.DEFAULT_GROUP;
             }
             else
             {
                 AddToGroupCheckBox.IsChecked = true;
-                timer.GroupName = action;
+                GroupName = action;
             }
         }
     }
@@ -106,7 +102,7 @@ public partial class CreateTimerPage : ContentPage
                 $"Do you want to add this timer to {groupName}?", "Yes", "No");
             if (isAddingToNewGroup)
             {
-                timer.GroupName = groupName;
+                GroupName = groupName;
                 AddToGroupCheckBox.IsChecked = true;
             }
             else
@@ -116,51 +112,79 @@ public partial class CreateTimerPage : ContentPage
 
     private void SaveButton_Clicked(object sender, EventArgs e) => SaveTimer(false);
     private void SaveAndRunButton_Clicked(object sender, EventArgs e) => SaveTimer(true);
+    TTimer CreateTimerAndSaveData() => new TTimer(name: NameInput.Text, description: DescriptionInput.Text, doNotDisturb: doNotDisturb, groupName: GroupName, isAlarm: isAlarm);
+    void ClearData()
+    {
+        toTickHoursLabel.Text = "Hours: 0";
+        toTickMinutesLabel.Text = "Minutest: 0";
+        toTickSecondsLabel.Text = "Seconds: 0";
+        toTickHoursSlider.Value = 0;
+        toTickMinutesSlider.Value = 0;
+        toTickSecondsSlider.Value = 0;
+        hoursToTick = 0;
+        minutesToTick = 0;
+        secondsToTick = 0;
+        if (isAlarm)
+            InputsLayout.Remove(AlarmLayout);
+        isAlarm = false;
+        MakeAlarmCheckBox.IsChecked = false;
+        doNotDisturb = false;
+        GroupName = TTimer.DEFAULT_GROUP;
+    }
     async void SaveTimer(bool run)
     {
-        if (timer.isAlarm == false)
+        var timer = CreateTimerAndSaveData();
+        try
         {
-            timer.TimeToEndTicking = new DateTime(0,0,0).Add(new TimeSpan(hoursToTick, minutesToTick, secondsToTick));
-            timer.doNotDisturb = doNotDisturb;
-            if (run)
+            if (isAlarm == false)
             {
-                timer.isRunning = true;
-                timer.TickingStartedDateTime = DateTime.Now;
+                var timeToTick = new TimeSpan(hoursToTick, minutesToTick, secondsToTick);
+                timer.TimeToEndTicking = new DateTime().Add(timeToTick);
+                if (run)
+                {
+                    timer.isRunning = true;
+                    timer.TickingStartedDateTime = DateTime.Now;
+                    timer.SetupTimer(timeToTick, start: true);
 
+                }
+                else
+                {
+                    timer.isRunning = false;
+                    timer.TickingStartedDateTime = default;
+                }
             }
-            else
+            else // if alarm
             {
-                timer.isRunning = false;
-                timer.TickingStartedDateTime = default;
-            }
-        }
-        else // if alarm
-        {
-            if (datePicker.Date == DateTime.Today && timePicker.Time <= DateTime.Now.TimeOfDay)
-            {
-                await DisplayAlert("Ooops", "You cant confirm time which had already past ;c" +
-                    "\nTime switched to most closerly possible.", "Try again");
-                timePicker.Time = DateTime.Now.TimeOfDay.Add(new TimeSpan(0, 1, 0));
-                return;
-            }
+                if (datePicker.Date == DateTime.Today && timePicker.Time <= DateTime.Now.TimeOfDay)
+                {
+                    await DisplayAlert("Ooops", "You cant confirm time which had already past ;c" +
+                        "\nTime switched to most closerly possible.", "Try again");
+                    timePicker.Time = DateTime.Now.TimeOfDay.Add(new TimeSpan(0, 1, 0));
+                    return;
+                }
 
-            timer.doNotDisturb = doNotDisturb;
-            if (run)
-            {
-                timer.isRunning = true;
-                timer.TickingStartedDateTime = DateTime.Now;
+                timer.doNotDisturb = doNotDisturb;
+                if (run)
+                {
+                    timer.isRunning = true;
+                    timer.TickingStartedDateTime = DateTime.Now;
+                }
+                else
+                {
+                    timer.isRunning = false;
+                    timer.TickingStartedDateTime = default;
+                }
                 timer.WhenToAlarmDateTime = datePicker.Date.Add(timePicker.Time);
                 timer.TimeToEndTicking = timer.WhenToAlarmDateTime;
             }
-            else
-            {
-                timer.isRunning = false;
-                timer.TickingStartedDateTime = default;
-                timer.TimeToEndTicking = timer.WhenToAlarmDateTime;
-            }
+            mainVM.AllTimers.Add(timer);
+            ClearData();
+            await Shell.Current.GoToAsync("../");
         }
-
-        mainVM.AllTimers.Add(timer);
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     #region Layouts

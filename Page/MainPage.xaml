@@ -11,8 +11,7 @@
           Padding="10"
           Margin="10">
 
-        <Button x:Name="CreateTimerButton"
-                Text="Add Timer"
+        <Button Text="Add Timer"
                 Clicked="OnCreateTimer_Clicked"
                 HorizontalOptions="Center"
                 BackgroundColor="Violet"

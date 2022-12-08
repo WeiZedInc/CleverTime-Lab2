@@ -1,4 +1,5 @@
 ﻿using CleverTime.VM;
+using CommunityToolkit.Maui.Converters;
 
 namespace CleverTime;
 
@@ -13,6 +14,8 @@ public partial class MainPage : ContentPage
         mainVM = ServiceHelper.GetService<MainVM>();
         BindingContext = mainVM;
     }
+
+    public void UpdateVisual() => this.InitializeComponent();
 
     private async void OnCreateTimer_Clicked(object sender, EventArgs e) => 
         await Shell.Current.GoToAsync("CreateTimerPage");

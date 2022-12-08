@@ -1,4 +1,5 @@
-﻿using System.Timers;
+﻿using System.Runtime.CompilerServices;
+using System.Timers;
 
 namespace CleverTime
 {
@@ -8,6 +9,8 @@ namespace CleverTime
         //2.ручний інтерфейс для перегляду списку таймерів, керування таймерами, реалізувати як один список, можливо з додатковою фільтрацією
         //3.Звуковий та візуальний сигнал по завершенню часу.
         //4.Можливість виконання певних налаштовуваних дій по завершенню часу(наприклад, запуск програми чи відкриття документу).
+
+        static MainPage MainPage = ServiceHelper.GetService<MainPage>();
 
         public TTimer(DateTime startTickTime = default, DateTime alarmDateTime= default, TimeSpan timerTimeToTick= default, 
             bool isRunning = false, bool isAlarm = false, bool doNotDisturb = false, string groupName = DEFAULT_GROUP, string name = "test", string description = "test descr")
@@ -42,7 +45,7 @@ namespace CleverTime
 
         public static void OnTimerEvent(Object source, ElapsedEventArgs e)
         {
-            PopUps.ShowToast(text: "timer");
+            PopUps.ShowToast(text: $"Timer elapsed!");
         }
 
         public static void OnAlarmEvent(Object source, ElapsedEventArgs e)
@@ -53,26 +56,27 @@ namespace CleverTime
         async Task StartVisualTimerTicker()
         {
             var second = new TimeSpan(0, 0, 1);
-            while (TimeToEndTicking.Subtract(DateTime.Now) != TimeSpan.Zero)
+            while (TimeToEndTicking.TimeOfDay > TimeSpan.Zero)
             {
-                TimeToEndTicking.Subtract(second);
+                TimeToEndTicking = TimeToEndTicking.Subtract(second); 
+                MainPage.UpdateVisual();
                 await Task.Delay(1000);
             }
         }
 
-        private void SetupTimer(TimeSpan timeToTick, bool isRepeated = false, bool start = false)
+        public async void SetupTimer(TimeSpan timeToTick, bool isRepeated = false, bool start = false)
         {
             Timer = new System.Timers.Timer(timeToTick);
             Timer.Elapsed += TTimer.OnTimerEvent;
             Timer.AutoReset = isRepeated;
             if (start)
             {
-                StartVisualTimerTicker();
+                await StartVisualTimerTicker();
                 Timer.Start();
             }
         }
 
-        private void SetupAlarm(DateTime endTime, bool isRepeated = false)
+        public void SetupAlarm(DateTime endTime, bool isRepeated = false)
         {
             TimeSpan timeDifference = endTime.Subtract(DateTime.Now);
             Timer = new System.Timers.Timer(timeDifference);
