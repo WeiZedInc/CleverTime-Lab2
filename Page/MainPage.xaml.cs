@@ -28,7 +28,7 @@ public partial class MainPage : ContentPage
     }
 
     TTimer FindTimerByName(string name) =>
-        mainVM.AllTimers.First((timer) => timer.Name == name);
+        mainVM.AllTimers.First((t) => t.Name == name);
 
 }
 

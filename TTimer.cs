@@ -1,16 +1,21 @@
-﻿using System.Runtime.CompilerServices;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Timers;
 
 namespace CleverTime
 {
-    public class TTimer
+    public class TTimer : INotifyPropertyChanged
     {
         //1.Таймери на певний проміжок часу(власне таймери) або до заданого моменту часу(будильники), Можливість одночасного запуску декількох(довільної кількості) таймерів
         //2.ручний інтерфейс для перегляду списку таймерів, керування таймерами, реалізувати як один список, можливо з додатковою фільтрацією
         //3.Звуковий та візуальний сигнал по завершенню часу.
         //4.Можливість виконання певних налаштовуваних дій по завершенню часу(наприклад, запуск програми чи відкриття документу).
 
+        public event PropertyChangedEventHandler PropertyChanged;
         static MainPage MainPage = ServiceHelper.GetService<MainPage>();
+
 
         public TTimer(DateTime startTickTime = default, DateTime alarmDateTime= default, TimeSpan timerTimeToTick= default, 
             bool isRunning = false, bool isAlarm = false, bool doNotDisturb = false, string groupName = DEFAULT_GROUP, string name = "test", string description = "test descr")
@@ -43,23 +48,18 @@ namespace CleverTime
         public DateTime TimeToEndTicking { get; set; } // if timer  (gonna be for visual)
         public DateTime CurrentGoneTime { get; set; } = default; // need to be calculated
 
-        public static void OnTimerEvent(Object source, ElapsedEventArgs e)
-        {
-            PopUps.ShowToast(text: $"Timer elapsed!");
-        }
+        public static void OnTimerEvent(Object source, ElapsedEventArgs e) => PopUps.ShowToast(text: $"Timer elapsed!");
 
-        public static void OnAlarmEvent(Object source, ElapsedEventArgs e)
-        {
-            PopUps.ShowToast(text: "alarm");
-        }
+        public static void OnAlarmEvent(Object source, ElapsedEventArgs e) => PopUps.ShowToast(text: "alarm");
 
         async Task StartVisualTimerTicker()
         {
             var second = new TimeSpan(0, 0, 1);
             while (TimeToEndTicking.TimeOfDay > TimeSpan.Zero)
             {
-                TimeToEndTicking = TimeToEndTicking.Subtract(second); 
-                MainPage.UpdateVisual();
+                TimeToEndTicking = TimeToEndTicking.Subtract(second);
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if (handler != null) handler(this, new PropertyChangedEventArgs(nameof(TimeToEndTicking)));
                 await Task.Delay(1000);
             }
         }

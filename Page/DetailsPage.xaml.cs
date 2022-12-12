@@ -19,15 +19,15 @@ public partial class DetailsPage : ContentPage
     bool doNotDisturb = false;
 
     readonly MainPage MainPage;
-    readonly MainVM mainVM;
+    readonly MainVM MainVM;
 
 
     public DetailsPage()
     {
         InitializeComponent();
-        mainVM = ServiceHelper.GetService<MainVM>();
+        MainVM = ServiceHelper.GetService<MainVM>();
         MainPage = ServiceHelper.GetService<MainPage>();
-        Timer = MainPage.timer;
+        Timer = MainVM.AllTimers[MainVM.AllTimers.IndexOf(MainVM.AllTimers.Where(i => i.Name == MainPage.timer.Name).First())];
         if (Timer == null)
             return;
 
@@ -64,7 +64,7 @@ public partial class DetailsPage : ContentPage
         }
         else if (AddToGroupCheckBox.IsChecked)
         {
-            string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", mainVM.Groups.ToArray());
+            string action = await DisplayActionSheet("Choose Group:", "Cancel", "Add new", MainVM.Groups.ToArray());
             if (action == "Cancel" || string.IsNullOrWhiteSpace(action))
             {
                 AddToGroupCheckBox.IsChecked = false;
@@ -89,7 +89,7 @@ public partial class DetailsPage : ContentPage
     async void AddNewGroup()
     {
         string groupName = await DisplayPromptAsync("Add group", "Input desired group name.");
-        if (string.IsNullOrWhiteSpace(groupName) || mainVM.Groups.Contains(groupName))
+        if (string.IsNullOrWhiteSpace(groupName) || MainVM.Groups.Contains(groupName))
         {
             await DisplayAlert("Ooops", "Incorrect name for the group ;c", "Try again");
             AddToGroupCheckBox.IsChecked = false;
@@ -97,7 +97,7 @@ public partial class DetailsPage : ContentPage
         }
         else
         {
-            mainVM.Groups.Add(groupName);
+            MainVM.Groups.Add(groupName);
             bool isAddingToNewGroup = await DisplayAlert("Success", $"You created a group {groupName}!\n" +
                 $"Do you want to add this timer to {groupName}?", "Yes", "No");
             if (isAddingToNewGroup)
@@ -110,19 +110,30 @@ public partial class DetailsPage : ContentPage
         }
     }
 
-    private void SaveButton_Clicked(object sender, EventArgs e) => SaveTimer();
-    private void DeleteButton_Clicked(object sender, EventArgs e) => DeleteTimer();
+    private void DisableButton_Clicked(object sender, EventArgs e) => DisableButton();
+    private void SaveButton_Clicked(object sender, EventArgs e) => Save();
+    private void SaveAndActivate_Clicked(object sender, EventArgs e) => SaveAndActivate();
+    private void DeleteTimerButton_Clicked(object sender, EventArgs e) => DeleteTimer();
 
     async void DeleteTimer()
     {
         bool answer = await DisplayAlert("Attention", "Are you sure to delete timer?", "Yes", "No");
         if (answer)
         {
-            mainVM.AllTimers.Remove(mainVM.AllTimers.Where(i => i.Name == Timer.Name).Single());
+            MainVM.AllTimers[MainVM.AllTimers.IndexOf(MainVM.AllTimers.Where(i => i.Name == Timer.Name).First())] = null;
             await Shell.Current.GoToAsync("../");
         }
     }
-    async void SaveTimer()
+    async void DisableButton()
+    {
+        Timer.Timer = null;
+        if (Timer.isAlarm)
+            await DisplayAlert("Ooops", "Alarm stopped.", "Ok");
+        else
+            await DisplayAlert("Ooops", "Timer stopped.", "Ok");
+
+    }
+    async void Save()
     {
         try
         {
@@ -130,18 +141,48 @@ public partial class DetailsPage : ContentPage
             {
                 var timeToTick = new TimeSpan(hoursToTick, minutesToTick, secondsToTick);
                 Timer.TimeToEndTicking = new DateTime().Add(timeToTick);
-                if (Timer.isRunning)
-                {
-                    Timer.isRunning = true;
                     Timer.TickingStartedDateTime = DateTime.Now;
                     Timer.SetupTimer(timeToTick, start: true);
+            }
+            else // if alarm
+            {
+                if (datePicker.Date == DateTime.Today && timePicker.Time <= DateTime.Now.TimeOfDay)
+                {
+                    await DisplayAlert("Ooops", "You cant confirm time which had already past ;c" +
+                        "\nTime switched to most closerly possible.", "Try again");
+                    timePicker.Time = DateTime.Now.TimeOfDay.Add(new TimeSpan(0, 1, 0));
+                    return;
+                }
 
+                Timer.doNotDisturb = doNotDisturb;
+                Timer.WhenToAlarmDateTime = datePicker.Date.Add(timePicker.Time);
+                Timer.TimeToEndTicking = Timer.WhenToAlarmDateTime;
+            }
+            MainPage.UpdateVisual();
+            await Shell.Current.GoToAsync("../");
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    async void SaveAndActivate()
+    {
+        try
+        {
+            if (Timer.isAlarm == false) // timer
+            {
+                var timeToTick = new TimeSpan(hoursToTick, minutesToTick, secondsToTick);
+                Timer.TimeToEndTicking = new DateTime().Add(timeToTick);
+                Timer.isRunning = true;
+                Timer.TickingStartedDateTime = DateTime.Now;
+                if (Timer.Timer != null)
+                {
+                    Timer.Timer = null;
+                    Timer.SetupTimer(timeToTick, start: true);
                 }
                 else
-                {
-                    Timer.isRunning = false;
-                    Timer.TickingStartedDateTime = default;
-                }
+                Timer.SetupTimer(timeToTick, start: true);
             }
             else // if alarm
             {
@@ -156,19 +197,15 @@ public partial class DetailsPage : ContentPage
                 Timer.doNotDisturb = doNotDisturb;
                 if (Timer.isRunning)
                 {
-                    Timer.isRunning = true;
                     Timer.TickingStartedDateTime = DateTime.Now;
                 }
                 else
-                {
-                    Timer.isRunning = false;
                     Timer.TickingStartedDateTime = default;
-                }
+
+                Timer.isRunning = true;
                 Timer.WhenToAlarmDateTime = datePicker.Date.Add(timePicker.Time);
                 Timer.TimeToEndTicking = Timer.WhenToAlarmDateTime;
             }
-            var id = mainVM.AllTimers.IndexOf(mainVM.AllTimers.Where(i => i.Name == MainPage.timer.Name).Single());
-            mainVM.AllTimers[id] = Timer;
             MainPage.UpdateVisual();
             await Shell.Current.GoToAsync("../");
         }
@@ -200,6 +237,7 @@ public partial class DetailsPage : ContentPage
 
 
         toTickHoursSlider = new Slider();
+        toTickHoursSlider.Value = Timer.TimeToEndTicking.Hour;
         toTickHoursSlider.ValueChanged += OnHoursSliderChanged;
         toTickHoursSlider.Minimum = 0;
         toTickHoursSlider.Maximum = 24;
@@ -207,6 +245,7 @@ public partial class DetailsPage : ContentPage
         TimerGrid.Add(toTickHoursSlider);
 
         toTickMinutesSlider = new Slider();
+        toTickMinutesSlider.Value = Timer.TimeToEndTicking.Minute;
         toTickMinutesSlider.ValueChanged += OnMinutesSliderChanged;
         toTickMinutesSlider.Minimum = 0;
         toTickMinutesSlider.Maximum = 60;
@@ -214,6 +253,7 @@ public partial class DetailsPage : ContentPage
         TimerGrid.Add(toTickMinutesSlider);
 
         toTickSecondsSlider = new Slider();
+        toTickSecondsSlider.Value = Timer.TimeToEndTicking.Second;
         toTickSecondsSlider.ValueChanged += OnSecondsSliderChanged;
         toTickSecondsSlider.Minimum = 0;
         toTickSecondsSlider.Maximum = 60;
@@ -226,14 +266,17 @@ public partial class DetailsPage : ContentPage
         TimerGrid.Add(timeToTickLabel);
 
         toTickHoursLabel = new Label();
+        toTickHoursLabel.Text = Timer.TimeToEndTicking.Hour.ToString();
         Grid.SetRow(toTickHoursLabel, 2);
         TimerGrid.Add(toTickHoursLabel);
 
         toTickMinutesLabel = new Label();
+        toTickMinutesLabel.Text = Timer.TimeToEndTicking.Minute.ToString();
         Grid.SetRow(toTickMinutesLabel, 4);
         TimerGrid.Add(toTickMinutesLabel);
 
         toTickSecondsLabel = new Label();
+        toTickSecondsLabel.Text = Timer.TimeToEndTicking.Second.ToString();
         Grid.SetRow(toTickSecondsLabel, 6);
         TimerGrid.Add(toTickSecondsLabel);
 
@@ -269,14 +312,14 @@ public partial class DetailsPage : ContentPage
 
         timePicker = new TimePicker
         {
-            Time = new TimeSpan(8, 0, 0),
+            Time = Timer.WhenToAlarmDateTime.TimeOfDay,
         };
 
         datePicker = new DatePicker
         {
             MinimumDate = DateTime.Today,
             MaximumDate = DateTime.MaxValue,
-            Date = DateTime.Today,
+            Date = Timer.WhenToAlarmDateTime.Date,
         };
         datePicker.HorizontalOptions = LayoutOptions.CenterAndExpand;
 

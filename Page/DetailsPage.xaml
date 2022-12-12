@@ -40,15 +40,23 @@
 
         <HorizontalStackLayout Margin="10" Spacing="10" HorizontalOptions="CenterAndExpand">
             <Button
-            x:Name="SaveButton"
+            Text="Save and activate"
+                Clicked="SaveAndActivate_Clicked">
+            </Button>
+
+            <Button
             Text="Save"
                 Clicked="SaveButton_Clicked">
             </Button>
 
             <Button
-            x:Name="DeleteButton"
+            Text="Disable"
+                Clicked="DisableButton_Clicked">
+            </Button>
+
+            <Button
             Text="Delete"
-                Clicked="DeleteButton_Clicked">
+                Clicked="DeleteTimerButton_Clicked">
             </Button>
         </HorizontalStackLayout>
 
